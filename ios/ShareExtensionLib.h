@@ -1,5 +1,6 @@
+#import <UIKit/UIKit.h>
 #import <React/RCTBridgeModule.h>
 
-@interface ShareExtensionLib : NSObject <RCTBridgeModule>
-
+@interface OuShare : UIViewController <RCTBridgeModule>
+- (UIView*) shareView;
 @end
