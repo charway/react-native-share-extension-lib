@@ -1,4 +1,4 @@
-#import "OuShare.h"
+#import "ShareExtensionLib.h"
 #import "React/RCTRootView.h"
 #import <MobileCoreServices/MobileCoreServices.h>
 
@@ -8,7 +8,7 @@
 
 NSExtensionContext* extensionContext;
 
-@implementation OuShare {
+@implementation ShareExtensionLib {
     NSTimer *autoTimer;
     NSString* type;
     NSString* value;
