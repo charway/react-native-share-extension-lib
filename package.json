@@ -1,23 +1,23 @@
 {
   "name": "react-native-share-extension-lib",
   "title": "React Native Share Extension Lib",
-  "version": "1.0.0",
-  "description": "TODO",
+  "version": "1.0.1",
+  "description": "Share Extension For React Native",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/github_account/react-native-share-extension-lib.git",
-    "baseUrl": "https://github.com/github_account/react-native-share-extension-lib"
+    "url": "git+https://github.com/charway/react-native-share-extension-lib.git",
+    "baseUrl": "https://github.com/charway/react-native-share-extension-lib"
   },
   "keywords": [
     "react-native"
   ],
   "author": {
-    "name": "Your Name",
-    "email": "yourname@email.com"
+    "name": "charway",
+    "email": "charway@qq.com"
   },
   "license": "MIT",
   "licenseFilename": "LICENSE",
