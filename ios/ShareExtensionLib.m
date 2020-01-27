@@ -5,6 +5,8 @@
 #define URL_IDENTIFIER @"public.url"
 #define IMAGE_IDENTIFIER @"public.image"
 #define TEXT_IDENTIFIER (NSString *)kUTTypePlainText
+#define VIDEO_IDENTIFIER (NSString *)kUTTypeVideo
+#define MOVIE_IDENTIFIER (NSString *)kUTTypeMovie
 
 NSExtensionContext* extensionContext;
 
@@ -39,6 +41,7 @@ RCT_EXPORT_MODULE()
 RCT_EXPORT_METHOD(close) {
     [extensionContext completeRequestReturningItems:nil
                                   completionHandler:nil];
+    exit(0);
 }
 
 
@@ -75,34 +78,74 @@ RCT_REMAP_METHOD(data,
         __block NSItemProvider *urlProvider = nil;
         __block NSItemProvider *imageProvider = nil;
         __block NSItemProvider *textProvider = nil;
+        __block NSItemProvider *videoProvider = nil;
+
+        __block NSString *typeIdentifierVideo;
 
         [attachments enumerateObjectsUsingBlock:^(NSItemProvider *provider, NSUInteger idx, BOOL *stop) {
             if([provider hasItemConformingToTypeIdentifier:URL_IDENTIFIER]) {
                 urlProvider = provider;
-                *stop = YES;
             } else if ([provider hasItemConformingToTypeIdentifier:TEXT_IDENTIFIER]){
                 textProvider = provider;
-                *stop = YES;
             } else if ([provider hasItemConformingToTypeIdentifier:IMAGE_IDENTIFIER]){
                 imageProvider = provider;
+                *stop = YES;
+            } else if ([provider hasItemConformingToTypeIdentifier:VIDEO_IDENTIFIER]){
+                videoProvider = provider;
+                typeIdentifierVideo = VIDEO_IDENTIFIER;
+                *stop = YES;
+            } else if ([provider hasItemConformingToTypeIdentifier:MOVIE_IDENTIFIER]){
+                videoProvider = provider;
+                typeIdentifierVideo = MOVIE_IDENTIFIER;
                 *stop = YES;
             }
         }];
 
-        if(urlProvider) {
+        if (urlProvider && textProvider) {
+            __block NSString *text;
+            __block NSString *url;
+            [urlProvider loadItemForTypeIdentifier:URL_IDENTIFIER options:nil completionHandler:^(id<NSSecureCoding> item, NSError *error) {
+                NSURL *urlItem = (NSURL *)item;
+                url = [urlItem absoluteString];
+                [textProvider loadItemForTypeIdentifier:TEXT_IDENTIFIER options:nil completionHandler:^(id<NSSecureCoding> item, NSError *error) {
+                    text = (NSString *)item;
+                    if(callback) {
+                        callback([NSString stringWithFormat:@"%@\n%@", text, url], @"text", nil);
+                    }
+                }];
+            }];
+        } else if (urlProvider) {
             [urlProvider loadItemForTypeIdentifier:URL_IDENTIFIER options:nil completionHandler:^(id<NSSecureCoding> item, NSError *error) {
                 NSURL *url = (NSURL *)item;
-
+                
+                NSString *type = ([[[url absoluteString] pathExtension]  isEqualToString:@""]) || [url.scheme containsString:@"http"] ? @"text" : @"media";
                 if(callback) {
-                    callback([url absoluteString], @"text/plain", nil);
+                    callback([url absoluteString], type, nil);
                 }
             }];
         } else if (imageProvider) {
             [imageProvider loadItemForTypeIdentifier:IMAGE_IDENTIFIER options:nil completionHandler:^(id<NSSecureCoding> item, NSError *error) {
-                NSURL *url = (NSURL *)item;
+                UIImage *sharedImage;
+                NSString *fullPath = nil;
+                NSString *path = nil;
+
+                if ([(NSObject *)item isKindOfClass:[UIImage class]]){
+                    sharedImage = (UIImage *)item;
+                    fullPath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"image.png"];
+                    [UIImagePNGRepresentation(sharedImage) writeToFile:fullPath atomically:YES];
+                    path = [NSString stringWithFormat:@"%@%@", @"file://", fullPath];
+                    if(callback) {
+                        callback(path, @"media", nil);
+                    }
+                }else if ([(NSObject *)item isKindOfClass:[NSURL class]]){
+                    NSURL* url = (NSURL *)item;
+                    if(callback) {
+                        callback([url absoluteString], @"media", nil);
+                    }
+                }
 
                 if(callback) {
-                    callback([url absoluteString], [[[url absoluteString] pathExtension] lowercaseString], nil);
+                    callback(@"", @"media", nil);
                 }
             }];
         } else if (textProvider) {
@@ -110,7 +153,15 @@ RCT_REMAP_METHOD(data,
                 NSString *text = (NSString *)item;
 
                 if(callback) {
-                    callback(text, @"text/plain", nil);
+                    callback(text, @"text", nil);
+                }
+            }];
+        } else if (videoProvider) {
+            [videoProvider loadItemForTypeIdentifier:typeIdentifierVideo options:nil completionHandler:^(id<NSSecureCoding> item, NSError *error) {
+                NSURL *url = (NSURL *)item;
+
+                if(callback) {
+                    callback([url absoluteString], @"media", nil);
                 }
             }];
         } else {

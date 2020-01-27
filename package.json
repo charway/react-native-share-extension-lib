@@ -1,7 +1,7 @@
 {
   "name": "react-native-share-extension-lib",
   "title": "React Native Share Extension Lib",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Share Extension For React Native",
   "main": "index.js",
   "scripts": {
