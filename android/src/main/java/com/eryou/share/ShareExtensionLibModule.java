@@ -51,6 +51,15 @@ public class ShareExtensionLibModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void openURL() {
+        // Intent intent = new Intent();
+        // intent.setComponent(new ComponentName("所要打开的程序包名", "所要打开的程序包名+主运行类名"));
+        // intent.setAction(Intent.ACTION_VIEW);
+        // startActivity(intent);
+        // getCurrentActivity().finish();
+    }
+
+    @ReactMethod
     public void data(Promise promise) {
         promise.resolve(processIntent());
     }
@@ -82,13 +91,11 @@ public class ShareExtensionLibModule extends ReactContextBaseJavaModule {
                 if (uri != null) {
                     text = "file://" + RealPathUtil.getRealPathFromURI(currentActivity, uri);
                     map.putString("value", text);
-
                     if (type.equals("image/*")) {
                         type = "image/jpeg";
                     } else if (type.equals("video/*")) {
                         type = "video/mp4";
                     }
-
                     map.putString("type", "media");
                 }
             }
